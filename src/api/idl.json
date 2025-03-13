@@ -1,0 +1,230 @@
+{
+  "version": "0.1.0",
+  "name": "ride_sharing_app",
+  "instructions": [
+    {
+      "name": "initializeRide",
+      "accounts": [
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "trx",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "pickupLat",
+          "type": "f64"
+        },
+        {
+          "name": "pickupLon",
+          "type": "f64"
+        },
+        {
+          "name": "destinationLat",
+          "type": "f64"
+        },
+        {
+          "name": "destinationLon",
+          "type": "f64"
+        },
+        {
+          "name": "fare",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "updateRideStatus",
+      "accounts": [
+        {
+          "name": "trx",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "updater",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "newStatus",
+          "type": {
+            "defined": "RideStatus"
+          }
+        }
+      ]
+    },
+    {
+      "name": "completeRideAndPayDriver",
+      "accounts": [
+        {
+          "name": "trx",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "driver",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "signer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Ride",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "publicKey"
+          },
+          {
+            "name": "driver",
+            "type": {
+              "option": "publicKey"
+            }
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": "RideStatus"
+            }
+          },
+          {
+            "name": "pickupLat",
+            "type": "f64"
+          },
+          {
+            "name": "pickupLon",
+            "type": "f64"
+          },
+          {
+            "name": "destinationLat",
+            "type": "f64"
+          },
+          {
+            "name": "destinationLon",
+            "type": "f64"
+          },
+          {
+            "name": "fare",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "RideStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Pending"
+          },
+          {
+            "name": "Accepted"
+          },
+          {
+            "name": "Ongoing"
+          },
+          {
+            "name": "Completed"
+          },
+          {
+            "name": "Cancelled"
+          },
+          {
+            "name": "Paid"
+          },
+          {
+            "name": "Done"
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "RideNotPending",
+      "msg": "The ride is not in a pending state."
+    },
+    {
+      "code": 6001,
+      "name": "UnauthorizedDriver",
+      "msg": "Unauthorized driver for this ride."
+    },
+    {
+      "code": 6002,
+      "name": "InsufficientFunds",
+      "msg": "Insufficient funds for the ride."
+    },
+    {
+      "code": 6003,
+      "name": "NoAssignedDriver",
+      "msg": "No driver assigned for this ride."
+    },
+    {
+      "code": 6004,
+      "name": "UserAccountNotFound",
+      "msg": "No Account Found"
+    },
+    {
+      "code": 6005,
+      "name": "UnauthorizedUser",
+      "msg": "UnauthorizedUser"
+    },
+    {
+      "code": 6006,
+      "name": "RideNotCompleted",
+      "msg": "Ride is Pending"
+    },
+    {
+      "code": 6007,
+      "name": "DriverMismatch",
+      "msg": "Provided driver does not match the assigned driver."
+    }
+  ]
+}
