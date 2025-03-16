@@ -15,6 +15,7 @@ import { AnchorProvider, Program, web3, BN } from "@project-serum/anchor"
 import idl from '@/api/idl.json'
 import { PublicKey } from "@solana/web3.js"
 import { calculateDistance, calculateFare, lamportsToSol } from "@/lib/utils"
+import { useGetPendingRides } from "@/hook/solana"
 
 const PROGRAM_ID = process.env.NEXT_PUBLIC_PROGRAM_ID!
 
@@ -22,10 +23,12 @@ export const Modal = () => {
     const { pickup, destination, fare,setPickup,setDestination, setDistance, setFare} = useLocationStore()
     const [isLoading, setIsLoading] = useState(false)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
-    const { type,allowSwitch } = useUserStore()
+    const { type,allowSwitch,setDisableSwitch } = useUserStore()
     const { connection } = useConnection()
     const wallet = useAnchorWallet(); // Get the connected wallet
     const queryClient = useQueryClient()
+    const {data: rides,refetch} = useGetPendingRides()
+
 
     const handleRequestRide = async () => {
         setIsLoading(true)
@@ -58,12 +61,12 @@ export const Modal = () => {
                     .signers([rideAccount])
                     .rpc();
 
-                queryClient.invalidateQueries({ queryKey: ['get-pending-rides'] })
+                await queryClient.invalidateQueries({ queryKey: ['get-pending-rides'] })
+                await refetch()
                 console.log("Transaction successful:", tx);
                 setPickup(null),
                 setDestination(null)
                 setIsDialogOpen(false); 
-                
                 alert(`Transaction successful: ${tx}`)              
             } else {
                 alert("Can't Book Ride In Driver Mode If you want to Book Switch to Customer Mode Please")

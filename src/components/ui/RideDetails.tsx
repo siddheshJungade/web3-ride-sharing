@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { lamportsToSol } from "@/lib/utils"
 import { useUserStore } from '@/stores/user-store'
 import { PublicKey, Transaction, SystemProgram } from '@solana/web3.js'
@@ -35,7 +35,7 @@ const PROGRAM_ID = process.env.NEXT_PUBLIC_PROGRAM_ID!
 
 
 interface RideDetailsProps {
-    ride: any
+  localRide: any
 }
 
 const RideStatus: any = {
@@ -59,7 +59,15 @@ const DisplayRideStatus: any = {
     paid: "Paid"
 };
 
-const RideDetails: React.FC<RideDetailsProps> = ({ ride }) => {
+const RideDetails: React.FC<RideDetailsProps> = ({ localRide }) => {
+
+  const [ride, setRide] = useState(localRide);
+  const queryClient = useQueryClient()
+
+    useEffect(() => {
+      setRide(localRide);
+    }, [localRide]);
+
     const { type } = useUserStore()
     const { connection } = useConnection()
     const wallet = useAnchorWallet(); // Get the connected wallet
@@ -85,80 +93,64 @@ const RideDetails: React.FC<RideDetailsProps> = ({ ride }) => {
                     })
                     .rpc();
                 
-                    refetch()
-                console.log("Transaction successful:", tx);
+                await queryClient.invalidateQueries({ queryKey: ['get-pending-rides'] })
+                await refetch();
+                setRide({ ...ride, account: { ...ride.account, status: newStatus } }); // Update the ride state
             } catch (error) {
                 console.error('Error updating ride status:', error)
             }
         }
     }
 
-    console.log("ride",ride)
 
     return (
-              <Card key={ride?.publicKey}  className="w-full mb-4 p-4 border border-gray-300 rounded-lg">
-                <CardHeader>
-                  <CardDescription> <strong> User:  </strong>{ride.account.user}</CardDescription>
+        ride  &&   
+        <Card key={ride?.publicKey}  className="w-full mb-4 p-4 border border-gray-300 rounded-lg">
+        <CardHeader>
+          <CardDescription> <strong> User:  </strong>{ride.account.user}</CardDescription>
 
-                  {
-                     ride.account.driver && <CardDescription> <strong> Driver:  </strong>{ride.account.driver}</CardDescription>
+          {
+             ride.account.driver && <CardDescription> <strong> Driver:  </strong>{ride.account.driver}</CardDescription>
 
-                  }
-                  {/* <CardTitle>{type == 'DRIVER' && ride.account.user != wallet?.publicKey && ! ['paid','completed','done'].includes(ride.account.status) ? (
-                      <Select defaultValue={DisplayRideStatus[ride.account.status]} onValueChange={handleStatusChange}>
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Status"  defaultValue={ride.account.status} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Status</SelectLabel>
-                          {
-                            ["Pending","Accepted","Ongoing","Completed","Cancelled","Paid","Done"].map(item => (<SelectItem key={item} value={item}>{item}</SelectItem>) )
-                          }
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  ): `Status : ${DisplayRideStatus[ride.account.status]}`}</CardTitle> */}
-                  <CardDescription> <strong> Ride Time :  </strong> { moment.unix(ride?.account?.timestamp).format('DD-MM-YYYY HH:mm:ss')} </CardDescription>
+          }
+          <CardDescription> <strong> Ride Time :  </strong> { moment.unix(ride?.account?.timestamp).format('DD-MM-YYYY HH:mm:ss')} </CardDescription>
 
-                  <CardDescription> <strong> Status :  </strong> {DisplayRideStatus[ride.account.status]} </CardDescription>
+          <CardDescription> <strong> Status :  </strong> {DisplayRideStatus[ride.account.status]} </CardDescription>
 
-                <CardDescription><strong>Pickup:</strong> {ride.account.pickupAddress}</CardDescription>
-                <CardDescription><strong>Destination:</strong> {ride.account.destinationAddress}</CardDescription>
-                <CardTitle>Fare : {lamportsToSol(ride.account.fare)} SOL </CardTitle>
-                {(ride.account.status == "completed" && ride.account.user == wallet?.publicKey) && <CompleteRideButton ride={ride} />}
-                {
-                    type == 'DRIVER' && ride.account.user != wallet?.publicKey &&  ['pending'].includes(ride.account.status)
-                    && <Button className="" onClick={() => {
-                      handleStatusChange("Accepted")
-                    }}> Accept Ride </Button>
-                }
+        <CardDescription><strong>Pickup:</strong> {ride.account.pickupAddress}</CardDescription>
+        <CardDescription><strong>Destination:</strong> {ride.account.destinationAddress}</CardDescription>
+        <CardTitle>Fare : {lamportsToSol(ride.account.fare)} SOL </CardTitle>
+        {(ride.account.status == "completed" && ride.account.user == wallet?.publicKey) && <CompleteRideButton ride={ride} />}
+        {
+            type == 'DRIVER' && ride.account.user != wallet?.publicKey &&  ['pending'].includes(ride.account.status)
+            && <Button className="" onClick={() => {
+              handleStatusChange("Accepted")
+            }}> Accept Ride </Button>
+        }
 
-                {
-                    type == 'DRIVER' && ride.account.user != wallet?.publicKey && ride.account.status == "accepted"
-                    && <Button className="" onClick={() => {
-                      handleStatusChange("Ongoing")
-                    }}> Ongoing </Button>
-                }
+        {
+            type == 'DRIVER' && ride.account.user != wallet?.publicKey && ride.account.status == "accepted"
+            && <Button className="" onClick={() => {
+              handleStatusChange("Ongoing")
+            }}> Ongoing </Button>
+        }
 
 
-                {
-                    type == 'DRIVER' && ride.account.user != wallet?.publicKey && ride.account.status == "ongoing"
-                    && <Button className="" onClick={() => {
-                      handleStatusChange("Completed")
-                    }}> Completed </Button>
-                }
+        {
+            type == 'DRIVER' && ride.account.user != wallet?.publicKey && ride.account.status == "ongoing"
+            && <Button className="" onClick={() => {
+              handleStatusChange("Completed")
+            }}> Completed </Button>
+        }
 
-                {
-                    type == 'CUSTOMER' && ride.account.user == wallet?.publicKey && ride.account.status == "pending"
-                    && <Button className="" onClick={() => {
-                      handleStatusChange("Cancelled")
-                    }}> Cancelled </Button>
-                }
-
-                </CardHeader>
-  
-              </Card>
+        {
+            type == 'CUSTOMER' && ride.account.user == wallet?.publicKey && ride.account.status == "pending"
+            && <Button className="" onClick={() => {
+              handleStatusChange("Cancelled")
+            }}> Cancelled </Button>
+        }
+        </CardHeader>
+      </Card>
     )
 }
 

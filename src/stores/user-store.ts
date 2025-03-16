@@ -5,7 +5,7 @@ import {create} from 'zustand';
 export const useUserStore = create<UserStore>((set) => ({
   user: null,
   type: null,
-  allowSwitch: true,
+  allowSwitch: false,
   setUser: (user: User) => set({ user }),
   clearUser: () => set({ user: null }),
   setType: (type: UserType) => set({type}),

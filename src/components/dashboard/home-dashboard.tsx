@@ -69,17 +69,14 @@ function HomeDashboard() {
 
   return (
     <div className="w-full h-screen flex justify-start items-start relative">
-      <ToastContainer position="top-right" />
       <Map defaultCenter={defaultCenter} currentLocation={currentLocation} />
       <div className="flex bg-white p-4 rounded-xl flex-col gap-2 m-16 justify-start z-100 absolute">
-        <div className="flex flex-col gap-4 justify-start">
+        <div key="location-inputs" className="flex flex-col gap-4 justify-start">
           {[
             { title: "Pickup", method: setPickup, value: pickup },
             { title: "Destination", method: setDestination,value: destination },
-          ].map((item, index) => (<>
-          
+          ].map((item, index) => (
             <div key={index} className="flex">
-            <p className="mx-2"> Current </p>
               <Autocomplete
                 defaultValue={item.value?.name}
                 apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}
@@ -98,7 +95,6 @@ function HomeDashboard() {
                 />
 
             </div>
-            </>
           ))}
         </div>
          <Modal />

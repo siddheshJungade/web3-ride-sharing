@@ -12,7 +12,7 @@ export const Map = ({
     defaultCenter,
     currentLocation
 }: MapProps) => {
-    const mapStyles = { width: '100vw', height: '100vh' };
+    const mapStyles = { width: '100vw', height: '100vh', backgroundColor: 'white' };
     const { pickup, destination, drivers } = useLocationStore();
     const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
     const [zoom, setZoom] = useState(13);

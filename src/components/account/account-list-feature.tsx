@@ -7,7 +7,6 @@ import { WalletButton } from '../solana/solana-provider'
 
 export default function AccountListFeature() {
   const { publicKey } = useWallet()
-  console.log("pub :",publicKey)
   if (publicKey) {
     return redirect(`/account/${publicKey.toString()}`)
   }

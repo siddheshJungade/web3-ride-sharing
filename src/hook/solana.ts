@@ -36,7 +36,6 @@ const useGetPendingRides = () => {
         const filters = []
 
         let accounts: any = []
-        console.log('query-type',type)
         if (type === "DRIVER") {
           // Fetch rides where driver is None
           const driverNoneAccounts = await connection.getProgramAccounts(programPublicKey, {
@@ -61,7 +60,6 @@ const useGetPendingRides = () => {
               }
             ]
           })
-          console.log("driver",driverCurrentUserAccounts)
           // Combine the results
           accounts = [...driverNoneAccounts, ...driverCurrentUserAccounts]
         } else {
@@ -77,7 +75,6 @@ const useGetPendingRides = () => {
             ]
           })
         }
-        console.log("Customer",accounts)
         let rideAccounts = []
         if(accounts && accounts.length > 0) {
            rideAccounts = await Promise.all(accounts.map(async ({ pubkey, account }: any) => {
@@ -105,8 +102,7 @@ const useGetPendingRides = () => {
             }
           }));
         }
-
-        console.log(rideAccounts)
+        console.log("ride-from-api",rideAccounts)
         return rideAccounts;
       } catch (error) {
         console.error("Error fetching rides:", error)

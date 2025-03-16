@@ -12,40 +12,17 @@ import { WalletButton } from "@/components/solana/solana-provider";
 export default function RidesPage() {
   const { type, setDisableSwitch} = useUserStore();
   const { data: rides, isLoading, error } = useGetPendingRides();
-  const [activeTab, setActiveTab] = useState("pending");
-  const [user, setUser] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState("ongoing");
+  const [filteredRides, setFilteredRides] = useState<any>([]);
 
   const wallet = useAnchorWallet()
-  // useEffect(() => {
-  //   const init = async () => {
-  //     await web3auth.initModal();
-  //     if (web3auth.provider) {
-  //       const user = await web3auth.getUserInfo();
-  //       setUser(user);
-  //     }
-  //   };
-  //   init();
-  // }, []);
-
-  // const login = async () => {
-  //   await web3auth.connect();
-  //   const user = await web3auth.getUserInfo();
-  //   setUser(user);
-  // };
-
-  // const logout = async () => {
-  //   await web3auth.logout();
-  //   setUser(null);
-  // };
 
   useEffect(() => {
     if(rides) {
       let statusList = ["ongoing","accepted","completed"]
-
       if(type == "CUSTOMER") {
         statusList.push("pending")
       }
-      console.log(statusList)
       const existingRide = rides?.filter(ride => statusList.includes(ride.account.status))
       if(existingRide && existingRide.length > 0) {
         setDisableSwitch(true) 
@@ -58,7 +35,8 @@ export default function RidesPage() {
     }
   },[rides])
 
-  const filteredRides = rides
+  useEffect(() => {
+    const fRide = rides
     ? rides.filter((ride: any) => {
         if (activeTab === "ongoing") {
           return ["ongoing","pending","accepted"].includes(ride.account.status);
@@ -69,16 +47,17 @@ export default function RidesPage() {
         return ride.account.status === "completed";
       })
     : [];
+    setFilteredRides(fRide)
+  },[activeTab, rides])
 
   return (
     <div className="">
-      {/* {user ? */}
-
+  
       {!wallet &&   <WalletButton />}
 
       {wallet  &&         <div>
           {/* <button onClick={logout}>Logout</button> */}
-          <Tabs defaultValue={"ongoing"} value={activeTab} onValueChange={setActiveTab}>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="bg-white flex  space-x-4 mb-4">
               <TabsTrigger
                 value="completed"

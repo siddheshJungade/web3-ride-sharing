@@ -32,7 +32,6 @@ export const useHandleStatusChange = (wallet: any, connection: any,refetch: any)
             const program = new Program(idl as any, new PublicKey(PROGRAM_ID), provider);
 
             try {
-                console.log(RideStatus[newStatus]);
                 const tx = await program.methods
                     .updateRideStatus(RideStatus[newStatus])
                     .accounts({
@@ -42,7 +41,6 @@ export const useHandleStatusChange = (wallet: any, connection: any,refetch: any)
                     })
                     .rpc();
 
-                console.log("Transaction successful:", tx);
             } catch (error) {
                 console.error("Error updating ride status:", error);
             } finally {
